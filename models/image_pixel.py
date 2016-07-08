@@ -4,12 +4,12 @@ from models.gradient import Gradient
 
 class ImagePixel:
 
-    def __init__(self, value=0,
+    def __init__(self, value=-1,
                  neighbors=numpy.array([[-1, -1, -1], [-1, -1, -1], [-1, -1, -1]]),
                  gradient_horizontal=Gradient(),
                  gradient_vertical=Gradient()):
         self.value = value
-        self.energy_value = 0
+        self.energy_value = -1
         self.neighbors = neighbors
         self.gradient_horizontal = gradient_horizontal
         self.gradient_vertical = gradient_vertical
