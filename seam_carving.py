@@ -1,5 +1,5 @@
 from models.Iterator.VerticalGradientIterator import VerticalGradientIterator
-from models.gradient import ParentHorizontalDirection, ParentVerticalDirection
+from models.gradient import ParentHorizontalDirection, ParentVerticalDirection, Gradient
 from models.image_pixel import ImagePixel
 from models.seam_carving_image import SeamCarvingImage
 
@@ -51,8 +51,40 @@ def regular_image_to_image_pixel_array(image):
 
 def set_image_gradients(image):
     for pixel in image:
-        pixel.gradient_horizontal.update()
-        pixel.gradient_vertical.update()
+        set_pixel_vertical_gradient(pixel)
+        set_pixel_horizontal_gradient(pixel)
+
+
+def set_pixel_vertical_gradient(pixel):
+    if pixel.north().gradient_vertical.value < pixel.north().east().gradient_vertical.value:
+        if pixel.north().gradient_vertical.value < pixel.north().west().gradient_vertical.value:
+            pixel.gradient_vertical = Gradient(value=pixel.north().gradient_vertical.value + pixel.energy_value,
+                                               parent=pixel.north(),
+                                               parent_direction=ParentVerticalDirection.north)
+    elif pixel.north().east().gradient_vertical.value < pixel.north().west().gradient_vertical.value:
+        pixel.gradient_vertical = Gradient(value=pixel.north().east().gradient_vertical.value + pixel.energy_value,
+                                           parent=pixel.north().east(),
+                                           parent_direction=ParentVerticalDirection.north_east)
+    else:
+        pixel.gradient_vertical = Gradient(value=pixel.north().west().gradient_vertical.value + pixel.energy_value,
+                                           parent=pixel.north().west(),
+                                           parent_direction=ParentVerticalDirection.north_west)
+
+
+def set_pixel_horizontal_gradient(pixel):
+    if pixel.north().west().gradient_horizontal.value < pixel.west().gradient_horizontal.value:
+        if pixel.north().west().gradient_horizontal.value < pixel.south().west().gradient_horizontal.value:
+            pixel.gradient_horizontal = Gradient(value=pixel.north().west().gradient_horizontal.value + pixel.energy_value,
+                                                 parent=pixel.north().west(),
+                                                 parent_direction=ParentHorizontalDirection.north_west)
+    elif pixel.west().gradient_horizontal.value < pixel.south().west().gradient_horizontal.value:
+        pixel.gradient_horizontal = Gradient(value=pixel.west().gradient_horizontal.value + pixel.energy_value,
+                                             parent=pixel.west(),
+                                             parent_direction=ParentHorizontalDirection.west)
+    else:
+        pixel.gradient_horizontal = Gradient(value=pixel.south().west().gradient_horizontal.value + pixel.energy_value,
+                                             parent=pixel.south().west(),
+                                             parent_direction=ParentHorizontalDirection.south_west)
 
 
 def set_image_neighbors(image_pixel_array):
