@@ -6,10 +6,10 @@ class ImagePixel:
 
     def __init__(self,
                  value=-1,
-                 north=-1,
-                 east=-1,
-                 south=-1,
-                 west=-1,
+                 north=None,
+                 east=None,
+                 south=None,
+                 west=None,
                  gradient_horizontal=Gradient(),
                  gradient_vertical=Gradient()):
         self.value = value
