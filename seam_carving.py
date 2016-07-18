@@ -1,3 +1,5 @@
+from models.Iterator.VerticalGradientIterator import VerticalGradientIterator
+from models.gradient import ParentHorizontalDirection, ParentVerticalDirection
 from models.image_pixel import ImagePixel
 from models.seam_carving_image import SeamCarvingImage
 
@@ -12,6 +14,33 @@ def regular_image_to_seam_carving_image(regular_image):
     set_image_neighbors(image_pixel_array)
     set_image_gradients(image)
     return image
+
+
+def find_seam_vertical(image):
+    min_pixel = min(image.horizontal_iterator)
+    iterator = VerticalGradientIterator(min_pixel)
+    for pixel, next_direction in iterator:
+        delete_vertical_pixel(pixel, next_direction)
+        last_pixel = pixel
+
+
+def delete_vertical_pixel(pixel, next_direction):
+    if pixel.east() is not None:
+        pixel.east().set_west(pixel.west())
+    if pixel.west() is not None:
+        pixel.west().set_east(pixel.east())
+    if ParentVerticalDirection.north_east == next_direction:
+        if pixel.north() is not None:
+            pixel.north().set_south(pixel.east())
+        if pixel.east() is not None:
+            pixel.east().set_north(pixel.north())
+    elif ParentVerticalDirection.north_west == next_direction:
+        if pixel.north() is not None:
+            pixel.north().set_south(pixel.west())
+        if pixel.west() is not None:
+            pixel.west().set_north(pixel.north())
+    update_pixel_energy(pixel.east())
+    update_pixel_energy(pixel.west())
 
 
 def regular_image_to_image_pixel_array(image):
@@ -41,3 +70,18 @@ def set_pixel_neighbors(pixel, array, row_index, column_index):
         pixel.set_east(array[row_index][column_index - 1])
     if column_index < len(array[0]):
         pixel.set_west(array[row_index][column_index + 1])
+    update_pixel_energy(pixel)
+
+
+def update_pixel_energy(pixel):
+    energy_value = pixel.north().value
+    energy_value += pixel.north().east().value
+    energy_value += pixel.east().value
+    energy_value += pixel.south().east().value
+    energy_value += pixel.south().value
+    energy_value += pixel.south().west().value
+    energy_value += pixel.west().value
+    energy_value += pixel.north().west().value
+    energy_value /= 8
+    pixel.energy_value = energy_value
+
